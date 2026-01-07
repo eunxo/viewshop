@@ -25,6 +25,12 @@
       <img src="@/assets/dog2.png" alt="강아지" class="dog-img" />
     </div>
   </div>
+  <div>
+    <div class="banner-center">
+      <h1 class="main-title">TIME SALE</h1>
+      <a href="#" class="view-more-btn">VIEW MORE</a>
+    </div>
+  </div>
 </template>
 
 <style scoped>
@@ -99,6 +105,51 @@
   max-width: 500px; 
   height: auto;
   display: block;
+}
+
+.banner-center {
+  display: flex;
+  flex-direction: column; /* 세로 방향으로 나열 */
+  align-items: center;    /* 가로축 중앙 정렬 */
+  justify-content: center; /* 세로축 중앙 정렬 */
+  padding: 50px;
+  background-color: #fff;
+}
+
+.main-title {
+  /* 이미지의 묵직한 폰트 스타일 */
+  font-family: 'Arial Black', sans-serif; 
+  color: #5d965a;      /* 이미지와 유사한 중간 톤의 초록색 */
+  font-size: 60px;     /* 글씨 크기 */
+  font-weight: 500;
+  margin: 0 0 30px 0;  /* 아래쪽 버튼과의 간격 */
+  letter-spacing: -1px; /* 글자 사이 간격을 좁혀 밀도감 있게 */
+
+  display: inline-block;
+  transform: scaleY(1,7);
+
+  letter-spacing: 2px;
+}
+
+.view-more-btn {
+  background-color: #5d965a;
+  color: #ffffff;
+  text-decoration: none;
+  font-family: 'Arial', sans-serif;
+  font-size: 18px;
+  font-weight: bold;
+  
+  /* 버튼 형태: 캡슐 모양 */
+  padding: 18px 45px;
+  border-radius: 40px; 
+  
+  /* 마우스 호버 효과 */
+  transition: transform 0.2s, background-color 0.2s;
+}
+
+.view-more-btn:hover {
+  background-color: #4a7a48; /* 마우스 올렸을 때 더 진한 초록색 */
+  transform: scale(1.05);     /* 살짝 커지는 효과 */
 }
 
 

@@ -27,6 +27,12 @@ const router = createRouter({
       path: '/cart',
       name: 'cart',
       component: () => import('../views/CartView.vue'),
+    },
+    // router/index.ts 예시
+    {
+      path: '/community/:id',
+      name: 'CommunityDetail',
+      component: () => import('../views/CommunityDetail.vue'),
     }
   ],
 })

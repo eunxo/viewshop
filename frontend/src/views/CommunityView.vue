@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue';
 import axios from 'axios';
-import { RouterLink } from 'vue-router'; // 명시적으로 추가
+import { RouterLink } from 'vue-router';
+// 1. 글쓰기 컴포넌트 임포트 (파일을 만들었다고 가정)
+import BoardRegister from '@/components/BoardRegister.vue'; 
 
-// 데이터 구조 정의 (TypeScript 오류 방지)
 interface Post {
   id: number;
   title: string;
@@ -12,17 +13,35 @@ interface Post {
   status: string;
 }
 
-const posts = ref<Post[]>([]); // 타입을 Post 배열로 지정
+const posts = ref<Post[]>([]);
+// 2. 현재 화면 상태 관리 (list: 목록, write: 글쓰기)
+const viewMode = ref<'list' | 'write'>('list');
+
+// CommunityView.vue 의 script 부분 수정
 
 const fetchPosts = async () => {
   try {
-    // 1. 서버가 켜져 있는지 확인
-    // 2. vite.config.ts의 proxy 설정에 의해 /api -> http://localhost:8080 으로 전달됨
-    const response = await axios.get('/api/community/posts');
+    // 주소 뒤에 시간을 붙여서(Date.now) 브라우저가 '옛날 데이터'를 보여주지 못하게 방어합니다.
+    const response = await axios.get(`http://localhost:8080/api/community/posts?t=${Date.now()}`);
     posts.value = response.data;
+    console.log("서버에서 받은 목록 데이터:", posts.value);
   } catch (error) {
-    console.error('데이터를 가져오는데 실패했습니다. 서버 상태를 확인하세요:', error);
+    console.error('목록 업데이트 실패:', error);
   }
+};
+
+const onPostRegistered = async () => {
+  console.log("1. 등록 완료 신호 감지");
+  
+  // 0.5초 정도 아주 잠깐 대기 (백엔드 리스트가 완전히 정리될 시간을 줍니다)
+  await new Promise(resolve => setTimeout(resolve, 500));
+  
+  // 2. 서버에서 최신 목록을 다시 가져오기
+  await fetchPosts(); 
+  
+  // 3. 화면을 목록으로 전환
+  viewMode.value = 'list';
+  console.log("2. 목록 갱신 및 화면 전환 완료");
 };
 
 onMounted(() => {
@@ -38,49 +57,57 @@ onMounted(() => {
         <p>PIT A PAT에게 궁금한 점을 남겨주세요.</p>
       </header>
 
-      <div class="board-controls">
-        <div class="search-bar">
-          <input type="text" placeholder="검색어를 입력하세요" />
-          <span class="material-symbols-outlined">search</span>
-        </div>
-        <button class="write-btn">문의하기</button>
+      <div v-if="viewMode === 'write'">
+        <BoardRegister @saved="onPostRegistered" @cancel="viewMode = 'list'" />
       </div>
 
-      <div class="board-list">
-        <div class="list-header">
-          <span class="col-id">번호</span>
-          <span class="col-title">제목</span>
-          <span class="col-author">작성자</span>
-          <span class="col-date">날짜</span>
-          <span class="col-status">상태</span>
-        </div>
-
-        <div v-for="post in posts" :key="post.id" class="list-item">
-          <span class="col-id">{{ post.id }}</span>
-          <div class="col-title">
-            <router-link :to="`/community/${post.id}`">
-              {{ post.title }}
-            </router-link>
-            <span class="mobile-info">{{ post.author }} | {{ post.date }}</span>
+      <div v-else>
+        <div class="board-controls">
+          <div class="search-bar">
+            <input type="text" placeholder="검색어를 입력하세요" />
+            <span class="material-symbols-outlined">search</span>
           </div>
-          <span class="col-author pc-only">{{ post.author }}</span>
-          <span class="col-date pc-only">{{ post.date }}</span>
-          <span class="col-status">
-            <span :class="['status-badge', post.status === '답변완료' ? 'done' : 'waiting']">
-              {{ post.status }}
-            </span>
-          </span>
+          <button class="write-btn" @click="viewMode = 'write'">문의하기</button>
         </div>
-      </div>
 
-      <div class="pagination">
-        <button class="active">1</button>
-        <button>2</button>
-        <button>3</button>
+        <div class="board-list">
+          <div class="list-header">
+            <span class="col-id">번호</span>
+            <span class="col-title">제목</span>
+            <span class="col-author">작성자</span>
+            <span class="col-date">날짜</span>
+            <span class="col-status">상태</span>
+          </div>
+
+          <div v-for="post in posts" :key="post.id" class="list-item">
+            <span class="col-id">{{ post.id }}</span>
+            <div class="col-title">
+              <router-link :to="`/community/${post.id}`">{{ post.title }}</router-link>
+              <span class="mobile-info">{{ post.author }} | {{ post.date }}</span>
+            </div>
+            <span class="col-author pc-only">{{ post.author }}</span>
+            <span class="col-date pc-only">{{ post.date }}</span>
+            <span class="col-status">
+              <span :class="['status-badge', post.status === '답변완료' ? 'done' : 'waiting']">
+                {{ post.status }}
+              </span>
+            </span>
+          </div>
+        </div>
+
+        <div class="pagination">
+          <button class="active">1</button>
+          <button>2</button>
+          <button>3</button>
+        </div>
       </div>
     </div>
   </div>
 </template>
+
+<style scoped>
+/* 기존 스타일 유지 */
+</style>
 
 <style scoped>
 .community-container {
